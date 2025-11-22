@@ -1,11 +1,12 @@
 import React from 'react';
-import { Sparkles, ExternalLink, Code, Github } from 'lucide-react';
+import { Sparkles, ExternalLink, Code, Coffee } from 'lucide-react';
 
 interface PromoModalProps {
   isOpen: boolean;
+  onSupportClick?: () => void;
 }
 
-export const PromoModal: React.FC<PromoModalProps> = ({ isOpen }) => {
+export const PromoModal: React.FC<PromoModalProps> = ({ isOpen, onSupportClick }) => {
   if (!isOpen) return null;
 
   return (
@@ -43,6 +44,16 @@ export const PromoModal: React.FC<PromoModalProps> = ({ isOpen }) => {
               <ExternalLink size={18} />
             </a>
           </div>
+          
+          {onSupportClick && (
+            <button 
+              onClick={onSupportClick}
+              className="w-full flex items-center justify-center gap-2 text-pink-600 font-bold py-3 rounded-xl border-2 border-pink-100 hover:bg-pink-50 transition-colors"
+            >
+               <Coffee size={18} />
+               <span>Wesprzyj Twórcę (Postaw Kawę)</span>
+            </button>
+          )}
 
           <div className="text-xs text-gray-400">
             Limit 3 gier został wyczerpany dla tego urządzenia.

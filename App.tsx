@@ -6,7 +6,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PaymentModal } from './components/PaymentModal';
 import { Leaderboard } from './components/Leaderboard';
 import { PromoModal } from './components/PromoModal';
-import { Cat, Trophy, AlertCircle, Clock, Star, Lightbulb, TimerOff, Youtube, Palette, CreditCard, BarChart2, Eye, ArrowLeft, Lock, Heart, Sparkles, ExternalLink, Coffee } from 'lucide-react';
+import { Cat, Trophy, AlertCircle, Clock, Star, Lightbulb, TimerOff, Youtube, Palette, CreditCard, BarChart2, Eye, ArrowLeft, Lock, Heart, Sparkles, Coffee } from 'lucide-react';
 
 const DIFFICULTY_CONFIG = {
   EASY: { cats: 7, time: 90, hints: 3, label: 'Łatwy', pointsPerCat: 100 },
@@ -16,11 +16,8 @@ const DIFFICULTY_CONFIG = {
 
 const STYLE_OPTIONS: { id: ArtStyle; label: string; icon: string }[] = [
   { id: 'MINECRAFT', label: 'Minecraft (Voxel)', icon: '🧱' },
-  { id: 'CARTOON', label: 'Gumball / Cartoon', icon: '🎨' },
-  { id: 'IMPRESSIONISM', label: 'Impresjonizm', icon: '🖌️' },
+  { id: 'CARTOON', label: 'Kreskówka', icon: '🎨' },
   { id: 'REALISTIC', label: 'Realistyczny', icon: '📷' },
-  { id: 'SKETCH', label: 'Szkic Ołówkiem', icon: '✏️' },
-  { id: 'ABSTRACT', label: 'Abstrakcja', icon: '🌀' },
 ];
 
 const MAX_FREE_GAMES = 3;
@@ -98,20 +95,27 @@ export default function App() {
     }
   }, [gameState]);
 
-  // Check limit on mount
-  useEffect(() => {
-    if (gamesPlayed >= MAX_FREE_GAMES) {
-      setShowPromo(true);
-    }
-  }, [gamesPlayed]);
-
   const incrementGameCount = () => {
     const newCount = gamesPlayed + 1;
     setGamesPlayed(newCount);
     localStorage.setItem('catHideouts_gamesPlayed', newCount.toString());
   };
 
+  const refundGameCount = () => {
+    const newCount = Math.max(0, gamesPlayed - 1); // Use state value since we incremented it optimistically (or not, depending on logic order, but here we assume we incremented)
+    // Actually, in startGame we increment first. So here we decrement.
+    // BUT wait, startGame uses 'gamesPlayed' state which might be stale inside the function scope if not careful, 
+    // but since we use functional updates or just reload logic, let's be safe.
+    // Simpler: we will just decrement current state.
+    setGamesPlayed(prev => {
+      const corrected = Math.max(0, prev - 1);
+      localStorage.setItem('catHideouts_gamesPlayed', corrected.toString());
+      return corrected;
+    });
+  };
+
   const startGame = async (selectedDifficulty?: Difficulty) => {
+    // 1. CRITICAL: Check limit BEFORE doing anything else.
     if (gamesPlayed >= MAX_FREE_GAMES) {
       setShowPromo(true);
       return;
@@ -132,23 +136,23 @@ export default function App() {
       setTimeLeft(config.time);
       setHintsLeft(config.hints);
 
-      // Increment game count immediately when starting generation
+      // 2. Increment game count immediately to prevent double-clicking abuse
+      // If generation fails, we will "refund" this in the catch block.
       incrementGameCount();
 
-      // 1. Generate Image
+      // 3. Generate Image
       const base64 = await generateCatLandscape(diff, selectedStyle);
       setImageData(base64);
 
-      // 2. Detect Cats
+      // 4. Detect Cats
       setGameState(GameState.ANALYZING_IMAGE);
-      // Pass the difficulty AND style to detection so it knows what KIND of cats to look for
       const boxes = await detectCatsInImage(base64, diff, selectedStyle);
 
       if (boxes.length === 0) {
         throw new Error("Nie udało się znaleźć kotów na wygenerowanym obrazku. Spróbuj ponownie.");
       }
 
-      // 3. Prepare Game
+      // 5. Prepare Game
       const gameCats: CatMarker[] = boxes.map((box, index) => ({
         id: `cat-${index}`,
         x: (box.xmin + box.xmax) / 2,
@@ -164,6 +168,9 @@ export default function App() {
       console.error(err);
       setErrorMsg(err.message || "Wystąpił błąd podczas generowania gry.");
       setGameState(GameState.ERROR);
+      
+      // REFUND: Give the game credit back if it failed
+      refundGameCount();
     }
   };
 
@@ -245,7 +252,7 @@ export default function App() {
       <div className="fixed left-6 top-1/2 -translate-y-1/2 z-40 hidden xl:flex flex-col gap-4">
         {/* Youtube Link */}
         <a 
-          href="https://aistudio.google.com" // Pointing to AI Studio as requested
+          href="https://aistudio.google.com" 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex flex-col items-center p-4 bg-white rounded-2xl shadow-xl border-2 border-white hover:border-purple-100 transition-all hover:-translate-y-1 w-40 group cursor-pointer"
@@ -375,7 +382,7 @@ export default function App() {
                <h3 className="text-lg font-bold text-gray-700 mb-4 flex items-center justify-center gap-2">
                  <Palette size={20} /> Wybierz Styl Graficzny
                </h3>
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                  {STYLE_OPTIONS.map((style) => (
                    <button
                      key={style.id}
@@ -406,7 +413,6 @@ export default function App() {
                  <button
                    key={level}
                    onClick={() => startGame(level)}
-                   disabled={isLocked}
                    className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-md
                      ${isLocked 
                         ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
@@ -645,7 +651,7 @@ export default function App() {
 
       {/* Modals */}
       <PaymentModal isOpen={isPaymentOpen} onClose={() => setIsPaymentOpen(false)} />
-      <PromoModal isOpen={showPromo} />
+      <PromoModal isOpen={showPromo} onSupportClick={() => setIsPaymentOpen(true)} />
 
     </div>
   );
