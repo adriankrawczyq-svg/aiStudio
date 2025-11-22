@@ -6,7 +6,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PaymentModal } from './components/PaymentModal';
 import { Leaderboard } from './components/Leaderboard';
 import { PromoModal } from './components/PromoModal';
-import { Cat, Trophy, AlertCircle, Clock, Star, Lightbulb, TimerOff, Youtube, Palette, CreditCard, BarChart2, Eye, ArrowLeft, Lock } from 'lucide-react';
+import { Cat, Trophy, AlertCircle, Clock, Star, Lightbulb, TimerOff, Youtube, Palette, CreditCard, BarChart2, Eye, ArrowLeft, Lock, Heart, Sparkles, ExternalLink, Coffee } from 'lucide-react';
 
 const DIFFICULTY_CONFIG = {
   EASY: { cats: 7, time: 90, hints: 3, label: 'Łatwy', pointsPerCat: 100 },
@@ -473,7 +473,7 @@ export default function App() {
               {/* VICTORY OVERLAY */}
               {gameState === GameState.WON && showResultOverlay && (
                 <div className="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-500">
-                   <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full transform scale-110 border-4 border-yellow-200 relative">
+                   <div className="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-sm w-full transform scale-110 border-4 border-yellow-200 relative flex flex-col max-h-[90vh] overflow-y-auto">
                       
                       {/* Review Board Button */}
                       <button 
@@ -484,13 +484,13 @@ export default function App() {
                         <Eye size={24} />
                       </button>
 
-                      <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-500 shadow-inner">
-                        <Trophy size={48} fill="currentColor" />
+                      <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 text-yellow-500 shadow-inner flex-shrink-0">
+                        <Trophy size={40} fill="currentColor" />
                       </div>
-                      <h2 className="text-3xl font-bold text-gray-800 mb-1">Zwycięstwo!</h2>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-1">Zwycięstwo!</h2>
                       <p className="text-gray-500 mb-4 text-sm">Wszystkie koty odnalezione</p>
                       
-                      <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+                      <div className="bg-gray-50 rounded-xl p-3 mb-4 space-y-2">
                         <div className="flex justify-between text-xl font-bold text-gray-800">
                           <span>Twój Wynik:</span>
                           <span>{score}</span>
@@ -498,6 +498,7 @@ export default function App() {
                       </div>
 
                       {/* Score Submission Form */}
+                      <div className="flex-grow">
                       {!scoreSubmitted ? (
                         <form onSubmit={submitScore} className="mb-4">
                           <div className="mb-3">
@@ -529,19 +530,32 @@ export default function App() {
                       ) : (
                          <button 
                             onClick={() => setGameState(GameState.LEADERBOARD)}
-                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg transition-all"
+                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg transition-all mb-4"
                           >
                             Zobacz Tabelę
                           </button>
                       )}
-                      
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <button 
-                           onClick={() => setShowResultOverlay(false)}
-                           className="text-sm text-gray-500 hover:text-pink-600 flex items-center justify-center gap-1 w-full"
-                        >
-                           <Eye size={16} /> Zobacz planszę
-                        </button>
+                      </div>
+
+                      {/* Footer Promo & Support */}
+                      <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                         <p className="text-xs text-gray-400 font-medium">Podobała Ci się gra?</p>
+                         <div className="flex gap-2 justify-center">
+                             <button 
+                               onClick={() => setIsPaymentOpen(true)}
+                               className="flex items-center gap-1.5 bg-pink-50 text-pink-600 hover:bg-pink-100 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                             >
+                                <Coffee size={14} /> Wesprzyj
+                             </button>
+                             <a 
+                               href="https://aistudio.google.com"
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="flex items-center gap-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                             >
+                                <Sparkles size={14} /> Zbudowane na Gemini
+                             </a>
+                         </div>
                       </div>
                    </div>
                 </div>
@@ -550,7 +564,7 @@ export default function App() {
               {/* GAME OVER OVERLAY */}
               {gameState === GameState.GAME_OVER && showResultOverlay && (
                 <div className="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-500">
-                   <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full border-4 border-red-200 relative">
+                   <div className="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-sm w-full border-4 border-red-200 relative flex flex-col max-h-[90vh] overflow-y-auto">
                       
                       {/* Review Board Button */}
                       <button 
@@ -561,13 +575,13 @@ export default function App() {
                         <Eye size={24} />
                       </button>
 
-                      <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-                        <TimerOff size={40} />
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500 flex-shrink-0">
+                        <TimerOff size={32} />
                       </div>
-                      <h2 className="text-3xl font-bold text-gray-800 mb-2">Koniec czasu!</h2>
-                      <p className="text-gray-600 mb-6">Koty wygrały tym razem.</p>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-1">Koniec czasu!</h2>
+                      <p className="text-gray-600 mb-4 text-sm">Koty wygrały tym razem.</p>
                       
-                      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                      <div className="bg-gray-50 rounded-xl p-4 mb-4">
                          <div className="text-sm text-gray-500 mb-1">Twój wynik</div>
                          <div className="text-3xl font-bold text-gray-800">{score}</div>
                          <div className="text-xs text-gray-400 mt-2">Znaleziono {foundCount} z {totalCount} kotów</div>
@@ -575,18 +589,30 @@ export default function App() {
 
                       <button 
                         onClick={() => setGameState(GameState.IDLE)}
-                        className="w-full bg-gray-800 hover:bg-gray-900 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg transition-all"
+                        className="w-full bg-gray-800 hover:bg-gray-900 text-white text-lg font-bold py-3 px-6 rounded-xl shadow-lg transition-all mb-2"
                       >
                         Spróbuj ponownie
                       </button>
-                      
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <button 
-                           onClick={() => setShowResultOverlay(false)}
-                           className="text-sm text-gray-500 hover:text-pink-600 flex items-center justify-center gap-1 w-full"
-                        >
-                           <Eye size={16} /> Pokaż gdzie były koty
-                        </button>
+
+                       {/* Footer Promo & Support */}
+                       <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                         <p className="text-xs text-gray-400 font-medium">Zbuduj własną grę z Google AI</p>
+                         <div className="flex gap-2 justify-center">
+                             <button 
+                               onClick={() => setIsPaymentOpen(true)}
+                               className="flex items-center gap-1.5 bg-pink-50 text-pink-600 hover:bg-pink-100 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                             >
+                                <Coffee size={14} /> Wesprzyj
+                             </button>
+                             <a 
+                               href="https://aistudio.google.com"
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="flex items-center gap-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                             >
+                                <Sparkles size={14} /> Wypróbuj Gemini
+                             </a>
+                         </div>
                       </div>
                    </div>
                 </div>
